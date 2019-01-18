@@ -22,6 +22,7 @@ async function getShowSubs(showName, options={}) {
     if (timeSinceCached > maxCacheAge) {
       await unlink(cachePath)
     } else {
+      if (typeof language == 'string') subs = subs.filter(node => node.querySelector('.l').textContent.toLowerCase().includes(language))
       return cachedData.subs
     }
   }
@@ -37,7 +38,6 @@ async function getShowSubs(showName, options={}) {
   const showHTML = (await fetch(show.url)).body.toString()
   const showDocument = (new JSDOM(showHTML)).window.document
   let subs = [...showDocument.querySelectorAll('.a1')].map(node => node.parentNode)
-  if (typeof language == 'string') subs = subs.filter(node => node.querySelector('.l').textContent.toLowerCase().includes(language))
   subs = subs.map(node => ({
     title: node.querySelector('.a1 span:nth-child(2)').textContent.trim(),
     url: "https://subscene.com" + node.querySelector('.a1 > a').href,
@@ -47,6 +47,7 @@ async function getShowSubs(showName, options={}) {
   }))
   const cachedVersion = JSON.stringify({saved: (new Date()).toDateString(), subs})
   await writeFile(cachePath, cachedVersion)
+  if (typeof language == 'string') subs = subs.filter(node => node.querySelector('.l').textContent.toLowerCase().includes(language))
   return subs
 }
 
