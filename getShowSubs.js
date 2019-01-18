@@ -1,9 +1,30 @@
 const fetch = require('./fetch')
 const {JSDOM} = require('jsdom')
+const {join} = require('path')
+const mkdirpAsync = require('./mkdirpAsync')
+const {writeFile, unlink} = require('mz/fs')
+
 const levenPercent = require('./levenPercent')
 
+const defaultMaxCacheAge = 1000 * 60 * 60 * 24 * 7 // 1 Week default max cache age
+const cacheDir = join(__dirname, 'showSubCache')
+
 async function getShowSubs(showName, options={}) {
-  let {threshold=.75, language="english", filters=[]} = options
+  await mkdirpAsync(cacheDir)
+  let {threshold=.75, language="english", filters=[], maxCacheAge=defaultMaxCacheAge} = options
+  const cachePath = join(cacheDir, showName + '.json')
+  let cachedData = null
+  try {
+    cachedData = require(cachePath)
+  } catch(error) {}
+  if (cachedData !== null) {
+    const timeSinceCached = (new Date()).getTime() - new Date(cachedData.saved).getTime()
+    if (timeSinceCached > maxCacheAge) {
+      await unlink(cachePath)
+    } else {
+      return cachedData.subs
+    }
+  }
   if (typeof language == 'string') language = language.toLowerCase()
   const rawHTML = (await fetch("https://subscene.com/subtitles/title?q="+encodeURIComponent(showName))).body.toString()
   const searchDocument = (new JSDOM(rawHTML)).window.document
@@ -24,6 +45,8 @@ async function getShowSubs(showName, options={}) {
     uploader: ((node.querySelector('.a5 a') || {}).textContent || "").trim() || null,
     comment: node.querySelector('.a6 div').textContent.trim()
   }))
+  const cachedVersion = JSON.stringify({saved: (new Date()).toDateString(), subs})
+  await writeFile(cachePath, cachedVersion)
   return subs
 }
 

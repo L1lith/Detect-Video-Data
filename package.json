@@ -20,6 +20,8 @@
     "cloudscraper": "^2.0.0",
     "jsdom": "^13.1.0",
     "leven": "^2.1.0",
+    "mkdirp": "^0.5.1",
+    "mz": "^2.7.0",
     "node-fetch": "^2.3.0",
     "string-compare": "^1.0.1"
   }
