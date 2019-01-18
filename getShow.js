@@ -9,9 +9,10 @@ const levenPercent = require('./levenPercent')
 const defaultMaxCacheAge = 1000 * 60 * 60 * 24 * 7 // 1 Week default max cache age
 const cacheDir = join(__dirname, 'showSubCache')
 
-async function getShowSubs(showName, options={}) {
+async function getShow(showName, options={}) {
   await mkdirpAsync(cacheDir)
   let {threshold=.75, language="english", filters=[], maxCacheAge=defaultMaxCacheAge} = options
+  if (typeof language == 'string') language = language.toLowerCase()
   const cachePath = join(cacheDir, showName + '.json')
   let cachedData = null
   try {
@@ -23,7 +24,7 @@ async function getShowSubs(showName, options={}) {
       await unlink(cachePath)
     } else {
       if (typeof language == 'string') cachedData.subs = cachedData.subs.filter(sub => sub.language.toLowerCase().includes(language))
-      return cachedData.subs
+      return cachedData
     }
   }
   if (typeof language == 'string') language = language.toLowerCase()
@@ -31,9 +32,9 @@ async function getShowSubs(showName, options={}) {
   const searchDocument = (new JSDOM(rawHTML)).window.document
   const resultDivs = [...searchDocument.querySelectorAll('.search-result .title a')]
   let results = resultDivs.map(a => ({name: a.textContent, url: "https://subscene.com" + a.href}))
-  results.forEach(show => show.likelyness = levenPercent(show.name, showName) >= threshold)
+  results.forEach(show => show.likelyness = levenPercent(show.name.toLowerCase(), showName.toLowerCase()))
   results = results.filter(show => show.likelyness >= threshold)
-  if (results.length < 1) throw new Error("Could not find a matching show")
+  if (results.length < 1) return null
   const show = results.sort((resultA, resultB) => resultB.likelyness - resultA.likelyness)[0]
   const showHTML = (await fetch(show.url)).body.toString()
   const showDocument = (new JSDOM(showHTML)).window.document
@@ -45,10 +46,10 @@ async function getShowSubs(showName, options={}) {
     uploader: ((node.querySelector('.a5 a') || {}).textContent || "").trim() || null,
     comment: node.querySelector('.a6 div').textContent.trim()
   }))
-  const cachedVersion = JSON.stringify({saved: (new Date()).toDateString(), subs})
-  await writeFile(cachePath, cachedVersion)
-  if (typeof language == 'string') subs = subs.filter(sub => sub.language.toLowerCase().includes(language))
-  return subs
+  const output = {saved: (new Date()).toDateString(), subs, showName, likelyness: show.likelyness}
+  await writeFile(cachePath, JSON.stringify(output))
+  if (typeof language == 'string') output.subs = output.subs.filter(sub => sub.language.toLowerCase().includes(language))
+  return output
 }
 
-module.exports = getShowSubs
+module.exports = getShow
