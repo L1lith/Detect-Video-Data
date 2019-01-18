@@ -20,6 +20,7 @@ async function downloadSub(subData, downloadFolder, fileName) {
   const stream = createWriteStream(subDestination)
   stream.write(subBuffer)
   stream.close()
+  return subDestination
 }
 
 module.exports = downloadSub
