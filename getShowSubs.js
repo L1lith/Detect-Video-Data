@@ -22,7 +22,7 @@ async function getShowSubs(showName, options={}) {
     if (timeSinceCached > maxCacheAge) {
       await unlink(cachePath)
     } else {
-      if (typeof language == 'string') subs = subs.filter(node => node.querySelector('.l').textContent.toLowerCase().includes(language))
+      if (typeof language == 'string') cachedData.subs = cachedData.subs.filter(sub => sub.language.toLowerCase().includes(language))
       return cachedData.subs
     }
   }
@@ -47,7 +47,7 @@ async function getShowSubs(showName, options={}) {
   }))
   const cachedVersion = JSON.stringify({saved: (new Date()).toDateString(), subs})
   await writeFile(cachePath, cachedVersion)
-  if (typeof language == 'string') subs = subs.filter(node => node.querySelector('.l').textContent.toLowerCase().includes(language))
+  if (typeof language == 'string') subs = subs.filter(sub => sub.language.toLowerCase().includes(language))
   return subs
 }
 
