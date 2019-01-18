@@ -1,0 +1,26 @@
+{
+  "name": "Detect-Video-Data",
+  "version": "1.0.0",
+  "description": "",
+  "main": "downloadSubtitleFile.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/L1lith/Detect-Video-Data.git"
+  },
+  "keywords": [],
+  "author": "L1lith",
+  "bugs": {
+    "url": "https://github.com/L1lith/Detect-Video-Data/issues"
+  },
+  "homepage": "https://github.com/L1lith/Detect-Video-Data#readme",
+  "dependencies": {
+    "cloudscraper": "^2.0.0",
+    "jsdom": "^13.1.0",
+    "leven": "^2.1.0",
+    "node-fetch": "^2.3.0",
+    "string-compare": "^1.0.1"
+  }
+}
