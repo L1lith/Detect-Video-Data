@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/L1lith/Detect-Video-Data#readme",
   "dependencies": {
+    "adm-zip": "^0.4.13",
     "cloudscraper": "^2.0.0",
     "jsdom": "^13.1.0",
     "leven": "^2.1.0",
